@@ -388,3 +388,167 @@ function UI:GetFlag(f)
 end
 
 return UI
+
+--: Slider & Dropdown*
+do
+    local TweenService = game:GetService("TweenService")
+    local UserInputService = game:GetService("UserInputService")
+
+    -- Slider
+    function _G.__AXIOMIR_ADD_SLIDER(sec, text, opt)
+        opt = opt or {}
+
+        local flag = opt.Flag or text
+        local min = opt.Min or 0
+        local max = opt.Max or 100
+        local default = opt.Default or min
+
+        local data = FlagRegistry[flag] or {
+            Value = default,
+            Default = default,
+            Save = true
+        }
+        FlagRegistry[flag] = data
+
+        local row = Instance.new("Frame")
+        row.Size = UDim2.new(1, 0, 0, 40)
+        row.BackgroundTransparency = 1
+        row.Parent = sec.Body
+
+        local label = Instance.new("TextLabel", row)
+        label.Size = UDim2.new(1, -60, 0, 16)
+        label.BackgroundTransparency = 1
+        label.Text = text
+        label.Font = Enum.Font.Gotham
+        label.TextSize = 12
+        label.TextColor3 = Color3.new(1,1,1)
+        label.TextXAlignment = Left
+
+        local valueLabel = Instance.new("TextLabel", row)
+        valueLabel.Position = UDim2.new(1, -50, 0, 0)
+        valueLabel.Size = UDim2.new(0, 50, 0, 16)
+        valueLabel.BackgroundTransparency = 1
+        valueLabel.Text = tostring(data.Value)
+        valueLabel.Font = Enum.Font.GothamBold
+        valueLabel.TextSize = 12
+        valueLabel.TextColor3 = Color3.fromRGB(120,160,255)
+        valueLabel.TextXAlignment = Right
+
+        local bar = Instance.new("Frame", row)
+        bar.Position = UDim2.new(0, 0, 0, 22)
+        bar.Size = UDim2.new(1, 0, 0, 10)
+        bar.BackgroundColor3 = Color3.fromRGB(50,50,50)
+        Instance.new("UICorner", bar).CornerRadius = UDim.new(1,0)
+
+        local fill = Instance.new("Frame", bar)
+        fill.Size = UDim2.fromScale((data.Value - min) / (max - min), 1)
+        fill.BackgroundColor3 = Color3.fromRGB(90,120,255)
+        Instance.new("UICorner", fill).CornerRadius = UDim.new(1,0)
+
+        local dragging = false
+
+        local function setValue(px)
+            local ratio = math.clamp(px / bar.AbsoluteSize.X, 0, 1)
+            local val = math.floor((min + (max - min) * ratio) * 100) / 100
+            data.Value = val
+            valueLabel.Text = tostring(val)
+            fill.Size = UDim2.fromScale(ratio, 1)
+            Dirty = true
+            if opt.Callback then
+                opt.Callback(val)
+            end
+        end
+
+        bar.InputBegan:Connect(function(i)
+            if i.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = true
+                setValue(i.Position.X - bar.AbsolutePosition.X)
+            end
+        end)
+
+        UserInputService.InputChanged:Connect(function(i)
+            if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+                setValue(i.Position.X - bar.AbsolutePosition.X)
+            end
+        end)
+
+        UserInputService.InputEnded:Connect(function(i)
+            if i.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = false
+            end
+        end)
+    end
+
+    
+    -- Dropdown
+    function _G.__AXIOMIR_ADD_DROPDOWN(sec, text, opt)
+        opt = opt or {}
+        local flag = opt.Flag or text
+        local list = opt.List or {}
+        local default = opt.Default or list[1]
+
+        local data = FlagRegistry[flag] or {
+            Value = default,
+            Default = default,
+            Save = true
+        }
+        FlagRegistry[flag] = data
+
+        local row = Instance.new("Frame")
+        row.Size = UDim2.new(1, 0, 0, 32)
+        row.BackgroundTransparency = 1
+        row.Parent = sec.Body
+
+        local btn = Instance.new("TextButton", row)
+        btn.Size = UDim2.new(1, 0, 1, 0)
+        btn.BackgroundColor3 = Color3.fromRGB(45,45,45)
+        btn.Text = text .. " : " .. tostring(data.Value)
+        btn.Font = Enum.Font.Gotham
+        btn.TextSize = 12
+        btn.TextColor3 = Color3.new(1,1,1)
+        Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
+
+        local open = false
+        local holder
+
+        local function close()
+            if holder then holder:Destroy() holder = nil end
+            open = false
+        end
+
+        btn.MouseButton1Click:Connect(function()
+            if open then
+                close()
+                return
+            end
+            open = true
+
+            holder = Instance.new("Frame", row)
+            holder.Position = UDim2.new(0,0,1,4)
+            holder.Size = UDim2.new(1,0,0,#list * 26)
+            holder.BackgroundColor3 = Color3.fromRGB(35,35,35)
+            holder.ZIndex = 10
+            Instance.new("UICorner", holder).CornerRadius = UDim.new(0,6)
+
+            for i,v in ipairs(list) do
+                local optBtn = Instance.new("TextButton", holder)
+                optBtn.Position = UDim2.new(0,0,0,(i-1)*26)
+                optBtn.Size = UDim2.new(1,0,0,26)
+                optBtn.BackgroundTransparency = 1
+                optBtn.Text = tostring(v)
+                optBtn.Font = Enum.Font.Gotham
+                optBtn.TextSize = 12
+                optBtn.TextColor3 = Color3.new(1,1,1)
+                optBtn.ZIndex = 11
+
+                optBtn.MouseButton1Click:Connect(function()
+                    data.Value = v
+                    btn.Text = text .. " : " .. tostring(v)
+                    Dirty = true
+                    if opt.Callback then opt.Callback(v) end
+                    close()
+                end)
+            end
+        end)
+    end
+end
