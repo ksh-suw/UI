@@ -371,6 +371,91 @@ function Window:AddTab(name)
                     end
                 end)
             end
+            function sec:AddSlider(text, opt)
+                opt = opt or {}
+                local flag = opt.Flag or text
+                local min = opt.Min or 0
+                local max = opt.Max or 100
+                local default = opt.Default or min
+
+                local data = registerFlag(flag, default)
+
+                local row = create("Frame", {
+                    Parent = body,
+                    Size = UDim2.new(1, 0, 0, 42),
+                    BackgroundTransparency = 1
+                })
+
+                create("TextLabel", {
+                    Parent = row,
+                    Size = UDim2.new(1, -60, 0, 16),
+                    BackgroundTransparency = 1,
+                    Text = text,
+                    Font = Enum.Font.Gotham,
+                    TextSize = 12,
+                    TextColor3 = Color3.new(1,1,1),
+                    TextXAlignment = Left
+                })
+
+                local valueLabel = create("TextLabel", {
+                    Parent = row,
+                    Position = UDim2.new(1, -50, 0, 0),
+                    Size = UDim2.new(0, 50, 0, 16),
+                    BackgroundTransparency = 1,
+                    Font = Enum.Font.GothamBold,
+                    TextSize = 12,
+                    TextColor3 = Color3.fromRGB(120,160,255),
+                    TextXAlignment = Right
+                })
+
+                local bar = create("Frame", {
+                    Parent = row,
+                    Position = UDim2.new(0, 0, 0, 22),
+                    Size = UDim2.new(1, 0, 0, 8),
+                    BackgroundColor3 = Color3.fromRGB(50,50,50)
+                })
+                create("UICorner",{Parent=bar,CornerRadius=UDim.new(1,0)})
+
+                    local fill = create("Frame", {
+                    Parent = bar,
+                    BackgroundColor3 = Color3.fromRGB(90,120,255)
+                })
+                create("UICorner",{Parent=fill,CornerRadius=UDim.new(1,0)})
+
+                local dragging = false
+
+                local function set(v)
+                    v = math.clamp(v, min, max)
+                    data.Value = v
+                    valueLabel.Text = tostring(v)
+                    fill.Size = UDim2.fromScale((v - min) / (max - min), 1)
+                    Dirty = true
+                    if opt.Callback then opt.Callback(v) end
+                end
+
+                data.Update = set
+                set(data.Value)
+
+                bar.InputBegan:Connect(function(i)
+                    if i.UserInputType == Enum.UserInputType.MouseButton1 then
+                        dragging = true
+                    end
+                end)
+
+                UserInputService.InputEnded:Connect(function(i)
+                    if i.UserInputType == Enum.UserInputType.MouseButton1 then
+                        dragging = false
+                    end
+                end)
+
+                RunService.RenderStepped:Connect(function()
+                    if dragging then
+                        local x = (UserInputService:GetMouseLocation().X - bar.AbsolutePosition.X)
+                        local ratio = x / bar.AbsoluteSize.X
+                        set(min + (max - min) * ratio)
+                    end
+                end)
+            end
 
             if callback then callback(sec) end
         end
