@@ -1,7 +1,8 @@
---  Axiomir UI-v1.4 test
+-- Axiomir UI Library 1.4
 -- Author: Goody
 
--- Services
+
+--// Services
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
@@ -11,7 +12,7 @@ local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 
 
--- Core
+-- Core State
 local UI = {}
 UI.__index = UI
 
@@ -38,7 +39,7 @@ local function saveConfig()
     ensureFolder()
 
     local data = {}
-    for k,v in pairs(FlagRegistry) do
+    for k, v in pairs(FlagRegistry) do
         if v.Save then
             data[k] = v.Value
         end
@@ -51,7 +52,7 @@ local function loadConfig()
     if not isfile(cfgPath()) then return end
 
     local data = HttpService:JSONDecode(readfile(cfgPath()))
-    for k,v in pairs(data) do
+    for k, v in pairs(data) do
         if FlagRegistry[k] then
             FlagRegistry[k].Value = v
             if FlagRegistry[k].Update then
@@ -71,11 +72,11 @@ task.spawn(function()
     end
 end)
 
--- Helpers
 
+-- Helpers
 local function create(class, props)
     local o = Instance.new(class)
-    for k,v in pairs(props or {}) do
+    for k, v in pairs(props or {}) do
         o[k] = v
     end
     return o
@@ -92,67 +93,72 @@ local function registerFlag(flag, default, save)
     return FlagRegistry[flag]
 end
 
+
 -- Notification System
 local NotifGui = create("ScreenGui", {
+    Name = "Axiomir_Notification",
     Parent = LocalPlayer:WaitForChild("PlayerGui"),
     ResetOnSpawn = false
 })
 
 local NotifHolder = create("Frame", {
     Parent = NotifGui,
-    AnchorPoint = Vector2.new(1,0),
-    Position = UDim2.fromScale(1,0),
-    Size = UDim2.new(0,320,1,0),
+    AnchorPoint = Vector2.new(1, 1),
+    Position = UDim2.fromScale(0.98, 0.95),
+    Size = UDim2.fromOffset(320, 400),
     BackgroundTransparency = 1
 })
 
-local NotifLayout = Instance.new("UIListLayout", NotifHolder)
-NotifLayout.Padding = UDim.new(0,8)
-NotifLayout.HorizontalAlignment = Right
-NotifLayout.VerticalAlignment = Top
+local notifLayout = Instance.new("UIListLayout", NotifHolder)
+notifLayout.Padding = UDim.new(0, 8)
+notifLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
 
-function UI:Notify(title, text, time)
-    time = time or 3
+function UI:Notify(title, text, duration)
+    duration = duration or 4
 
-    local box = create("Frame", {
+    local frame = create("Frame", {
         Parent = NotifHolder,
-        Size = UDim2.fromOffset(300,60),
-        BackgroundColor3 = Color3.fromRGB(35,35,35),
-        BackgroundTransparency = 1
-    })
-    create("UICorner",{Parent=box,CornerRadius=UDim.new(0,8)})
-
-    create("TextLabel",{
-        Parent=box,
-        Position=UDim2.fromOffset(10,6),
-        Size=UDim2.new(1,-20,0,18),
-        BackgroundTransparency=1,
-        Text=title,
-        Font=Enum.Font.GothamBold,
-        TextSize=13,
-        TextColor3=Color3.new(1,1,1),
-        TextXAlignment=Left
+        Size = UDim2.new(1, 0, 0, 70),
+        BackgroundColor3 = Color3.fromRGB(30, 30, 30),
+        BackgroundTransparency = 1,
+        AutomaticSize = Enum.AutomaticSize.Y
     })
 
-    create("TextLabel",{
-        Parent=box,
-        Position=UDim2.fromOffset(10,26),
-        Size=UDim2.new(1,-20,0,28),
-        BackgroundTransparency=1,
-        Text=text,
-        Font=Enum.Font.Gotham,
-        TextSize=12,
-        TextColor3=Color3.fromRGB(200,200,200),
-        TextWrapped=true,
-        TextXAlignment=Left
+    create("UICorner", { Parent = frame, CornerRadius = UDim.new(0, 8) })
+
+    create("TextLabel", {
+        Parent = frame,
+        Position = UDim2.fromOffset(10, 6),
+        Size = UDim2.new(1, -20, 0, 18),
+        BackgroundTransparency = 1,
+        Text = title,
+        Font = Enum.Font.GothamBold,
+        TextSize = 13,
+        TextColor3 = Color3.fromRGB(120, 170, 255),
+        TextXAlignment = Left
     })
 
-    TweenService:Create(box,TweenInfo.new(0.3),{BackgroundTransparency=0}):Play()
+    create("TextLabel", {
+        Parent = frame,
+        Position = UDim2.fromOffset(10, 26),
+        Size = UDim2.new(1, -20, 0, 40),
+        BackgroundTransparency = 1,
+        TextWrapped = true,
+        TextYAlignment = Top,
+        Text = text,
+        Font = Enum.Font.Gotham,
+        TextSize = 12,
+        TextColor3 = Color3.new(1, 1, 1),
+        TextXAlignment = Left
+    })
 
-    task.delay(time,function()
-        TweenService:Create(box,TweenInfo.new(0.3),{BackgroundTransparency=1}):Play()
-        task.wait(0.3)
-        box:Destroy()
+    TweenService:Create(frame, TweenInfo.new(0.25), { BackgroundTransparency = 0 }):Play()
+
+    task.delay(duration, function()
+        local tw = TweenService:Create(frame, TweenInfo.new(0.3), { BackgroundTransparency = 1 })
+        tw:Play()
+        tw.Completed:Wait()
+        frame:Destroy()
     end)
 end
 
@@ -177,98 +183,99 @@ function UI:CreateWindow(opt)
 
     self.Main = create("Frame", {
         Parent = self.Gui,
-        Size = opt.Size or UDim2.fromOffset(720,460),
-        AnchorPoint = Vector2.new(0.5,0.5),
-        Position = UDim2.fromScale(0.5,0.5),
-        BackgroundColor3 = Color3.fromRGB(25,25,25),
+        Size = opt.Size or UDim2.fromOffset(720, 460),
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Position = UDim2.fromScale(0.5, 0.5),
+        BackgroundColor3 = Color3.fromRGB(24, 24, 24),
         BorderSizePixel = 0
     })
-    create("UICorner",{Parent=self.Main,CornerRadius=UDim.new(0,10)})
 
-    -- Title Bar
-    local TitleBar = create("TextLabel", {
+    create("UICorner", { Parent = self.Main, CornerRadius = UDim.new(0, 10) })
+
+    local header = create("TextLabel", {
         Parent = self.Main,
-        Size = UDim2.new(1,0,0,34),
+        Size = UDim2.new(1, 0, 0, 34),
         BackgroundTransparency = 1,
-        Text = opt.Title or "UI",
+        Text = opt.Title or "Axiomir UI",
         Font = Enum.Font.GothamBold,
         TextSize = 14,
-        TextColor3 = Color3.new(1,1,1)
+        TextColor3 = Color3.new(1, 1, 1)
     })
 
     -- Drag
-    do
-        local dragging, startPos, startInput
-        TitleBar.InputBegan:Connect(function(i)
-            if i.UserInputType==Enum.UserInputType.MouseButton1 then
-                dragging=true
-                startPos=self.Main.Position
-                startInput=i.Position
-            end
-        end)
-        UserInputService.InputChanged:Connect(function(i)
-            if dragging and i.UserInputType==Enum.UserInputType.MouseMovement then
-                local delta=i.Position-startInput
-                self.Main.Position=startPos+UDim2.fromOffset(delta.X,delta.Y)
-            end
-        end)
-        UserInputService.InputEnded:Connect(function(i)
-            if i.UserInputType==Enum.UserInputType.MouseButton1 then
-                dragging=false
-            end
-        end)
-    end
+    header.InputBegan:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 then
+            local startPos = UserInputService:GetMouseLocation()
+            local startFrame = self.Main.Position
 
-    -- RightCtrl toggle
+            local move; move = RunService.RenderStepped:Connect(function()
+                local delta = UserInputService:GetMouseLocation() - startPos
+                self.Main.Position = startFrame + UDim2.fromOffset(delta.X, delta.Y)
+            end)
+
+            UserInputService.InputEnded:Once(function(e)
+                if e.UserInputType == Enum.UserInputType.MouseButton1 then
+                    move:Disconnect()
+                end
+            end)
+        end
+    end)
+
+    self.TabBar = create("Frame", {
+        Parent = self.Main,
+        Position = UDim2.fromOffset(0, 34),
+        Size = UDim2.new(1, 0, 0, 32),
+        BackgroundColor3 = Color3.fromRGB(30, 30, 30),
+        BorderSizePixel = 0
+    })
+
+    local tabLayout = Instance.new("UIListLayout", self.TabBar)
+    tabLayout.FillDirection = Enum.FillDirection.Horizontal
+
+    self.Content = create("Frame", {
+        Parent = self.Main,
+        Position = UDim2.fromOffset(0, 66),
+        Size = UDim2.new(1, 0, 1, -66),
+        BackgroundTransparency = 1
+    })
+
+    self.Tabs = {}
+
+    -- RightCtrl minimize
     local visible = true
-    UserInputService.InputBegan:Connect(function(i,gp)
-        if gp then return end
+    UserInputService.InputBegan:Connect(function(i, g)
+        if g then return end
         if i.KeyCode == Enum.KeyCode.RightControl then
             visible = not visible
-            TweenService:Create(self.Main,TweenInfo.new(0.25),{
+            TweenService:Create(self.Main, TweenInfo.new(0.25), {
                 BackgroundTransparency = visible and 0 or 1
             }):Play()
             self.Main.Visible = visible
         end
     end)
 
-    self.TabBar = create("Frame", {
-        Parent = self.Main,
-        Position = UDim2.fromOffset(0,34),
-        Size = UDim2.new(1,0,0,32),
-        BackgroundColor3 = Color3.fromRGB(30,30,30),
-        BorderSizePixel = 0
-    })
-
-    self.Content = create("Frame", {
-        Parent = self.Main,
-        Position = UDim2.fromOffset(0,66),
-        Size = UDim2.new(1,0,1,-66),
-        BackgroundTransparency = 1
-    })
-
-    self.Tabs = {}
     loadConfig()
     return self
 end
+
 
 -- Public API
 function UI:GetFlag(f)
     return FlagRegistry[f] and FlagRegistry[f].Value
 end
 
-function UI:SetFlag(f,v)
+function UI:SetFlag(f, v)
     if FlagRegistry[f] then
-        FlagRegistry[f].Value=v
+        FlagRegistry[f].Value = v
         if FlagRegistry[f].Update then
             FlagRegistry[f].Update(v)
         end
-        Dirty=true
+        Dirty = true
     end
 end
 
 function UI:SetConfigEnabled(v)
-    ConfigEnabled=v
+    ConfigEnabled = v
 end
 
 return UI
