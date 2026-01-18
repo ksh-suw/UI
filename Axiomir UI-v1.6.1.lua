@@ -270,9 +270,10 @@ function Window:AddTab(name)
     end
 
     function Tab:AddColumn(_, opt)
-        if Tab._Column then
-            return Tab._Column
-        end
+            Tab._Column = col
+            return col
+        return Tab._Column
+    end
 
         opt = opt or {}
         local col = {}
