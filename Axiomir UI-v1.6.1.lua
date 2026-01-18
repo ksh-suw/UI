@@ -244,6 +244,7 @@ end
 
 -- Tabs
 function Window:AddTab(name)
+    Tab._Column = nil
     local Tab={}
     local btn=create("TextButton",{Parent=self.TabBar,Size=UDim2.fromOffset(130,28),BackgroundColor3=Color3.fromRGB(32,32,32),Text=name,Font=Enum.Font.Gotham,TextSize=12,TextColor3=Color3.new(1,1,1)})
     create("UICorner",{Parent=btn,CornerRadius=UDim.new(0,6)})
@@ -268,23 +269,40 @@ function Window:AddTab(name)
         btn.BackgroundColor3=Color3.fromRGB(90,120,255)
     end
 
-    function Tab:AddColumn()
-        local col={}
-        local left=create("Frame",{Parent=page,Size=UDim2.new(0.5,-6,1,0),BackgroundTransparency=1})
-        local right=create("Frame",{Parent=page,Size=UDim2.new(0.5,-6,1,0),Position=UDim2.new(0.5,6,0,0),BackgroundTransparency=1})
-
-        local function layout(p)
-            local l=Instance.new("UIListLayout",p)
-            l.Padding=UDim.new(0,10)
+    function Tab:AddColumn(_, opt)
+        if Tab._Column then
+            return Tab._Column
         end
+
+        opt = opt or {}
+        local col = {}
+
+        local left = create("Frame",{
+            Parent = page,
+            Size = UDim2.new(0.5,-6,1,0),
+            BackgroundTransparency = 1
+        })
+        
+        local right = create("Frame",{
+            Parent = page,
+            Size = UDim2.new(0.5,-6,1,0),
+            Position = UDim2.new(0.5,6,0,0),
+            BackgroundTransparency = 1
+        })
+
+        local function layout(parent)
+            local l = Instance.new("UIListLayout")
+            l.Parent = parent
+            l.Padding = UDim.new(0,10)
+        end
+
         layout(left)
         layout(right)
 
-        function col:AddSection(title,callback,opt)
-            opt=opt or {}
-            local side=(opt.Side=="Right") and right or left
-            local sec={}
-
+        function col:AddSection(title, callback, opt2)
+            opt2 = opt2 or {}
+            local side = (opt2.Side == "Right") and right or left
+            local sec = {}
             local box=create("Frame",{Parent=side,AutomaticSize=Enum.AutomaticSize.Y,BackgroundColor3=Color3.fromRGB(30,30,30)})
             create("UICorner",{Parent=box,CornerRadius=UDim.new(0,8)})
 
