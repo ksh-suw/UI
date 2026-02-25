@@ -378,54 +378,11 @@ main.Size = UDim2.new(0, 500, 0, 350)
 main.Parent = unnamed
 main.ClipsDescendants = true
 
-
-local NameLabel = Instance.new("TextLabel")
-NameLabel.Name = "Username"
-NameLabel.BackgroundTransparency = 1
-NameLabel.Position = UDim2.new(0, 38, 0, 0)
-NameLabel.Size = UDim2.new(1, -40, 1, 0)
-NameLabel.Font = Enum.Font.GothamBold
-NameLabel.TextSize = 13
-NameLabel.TextColor3 = Color3.fromRGB(230, 230, 230)
-NameLabel.TextXAlignment = Enum.TextXAlignment.Left
-NameLabel.TextYAlignment = Enum.TextYAlignment.Center
-NameLabel.Text = localPlayer.Name
-NameLabel.Parent = PlayerInfo
-
 local uICorner = Instance.new("UICorner")
 uICorner.Name = "UICorner"
 uICorner.CornerRadius = UDim.new(0, 3)
 uICorner.Parent = main
---d
-local Players = game:GetService("Players")
-local localPlayer = Players.LocalPlayer
 
-local PlayerInfo = Instance.new("Frame")
-PlayerInfo.Name = "PlayerInfo"
-PlayerInfo.Size = UDim2.new(1, -10, 0, 40)
-PlayerInfo.Position = UDim2.new(0, 5, 1, -45) 
-PlayerInfo.BackgroundTransparency = 1
-PlayerInfo.Parent = main
-
-local Avatar = Instance.new("ImageLabel")
-Avatar.Name = "Avatar"
-Avatar.Size = UDim2.new(0, 32, 0, 32)
-Avatar.Position = UDim2.new(0, 0, 0, 4)
-Avatar.BackgroundTransparency = 1
-Avatar.Parent = PlayerInfo
-
-local AvatarCorner = Instance.new("UICorner")
-AvatarCorner.CornerRadius = UDim.new(1, 0)
-AvatarCorner.Parent = Avatar
-
-task.spawn(function()
-    local content = Players:GetUserThumbnailAsync(
-        localPlayer.UserId,
-        Enum.ThumbnailType.HeadShot,
-        Enum.ThumbnailSize.Size100x100
-    )
-    Avatar.Image = content
-end)--d
 local topbar = Instance.new("Frame")
 topbar.Name = "Topbar"
 topbar.BackgroundColor3 = Theme.Topbar
@@ -556,10 +513,14 @@ minimizeButton.MouseButton1Click:Connect(function()
         mainShadow.Visible = true
         topbar.TopbarLine.Visible = true
     end
-    for _,v in next, main:GetChildren() do
-        if v.Name ~= "Topbar" and v.ClassName == "Frame" or v.ClassName == "ScrollingFrame" then
-            v.Visible = not Minimized
-        end
+	for _,v in next, main:GetChildren() do
+    	if v.Name ~= "Topbar" and (v.ClassName == "Frame" or v.ClassName == "ScrollingFrame") then
+        	v.Visible = not Minimized
+    	end
+    --for _,v in next, main:GetChildren() do
+      --  if v.Name ~= "Topbar" and v.ClassName == "Frame" or v.ClassName == "ScrollingFrame" then
+        --    v.Visible = not Minimized
+        --end
     end
 end)
 
@@ -567,7 +528,75 @@ local uIStroke = Instance.new("UIStroke")
 uIStroke.Name = "UIStroke"
 uIStroke.Color = Theme.MainUIStroke
 uIStroke.Parent = main
+--d
+	--========================================
+-- Player Info (左下角顯示頭像 + 使用者名稱)
+-- 完整融合 Theme + 最小化自動隱藏
+--========================================
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 
+-- 容器
+local PlayerInfo = Instance.new("Frame")
+PlayerInfo.Name = "PlayerInfo"
+PlayerInfo.AnchorPoint = Vector2.new(0,1)
+PlayerInfo.Position = UDim2.new(0, 8, 1, -8)
+PlayerInfo.Size = UDim2.new(1, -16, 0, 40)
+PlayerInfo.BackgroundTransparency = 1
+PlayerInfo.Parent = main
+
+-- 背景框（與UI風格一致）
+local PlayerInfoFrame = Instance.new("Frame")
+PlayerInfoFrame.Name = "PlayerInfoFrame"
+PlayerInfoFrame.BackgroundColor3 = Theme.ItemFrame
+PlayerInfoFrame.Size = UDim2.new(0, 200, 0, 36)
+PlayerInfoFrame.Position = UDim2.new(0, 0, 0, 0)
+PlayerInfoFrame.Parent = PlayerInfo
+
+local PlayerInfoCorner = Instance.new("UICorner")
+PlayerInfoCorner.CornerRadius = UDim.new(0, 3)
+PlayerInfoCorner.Parent = PlayerInfoFrame
+
+local PlayerInfoStroke = Instance.new("UIStroke")
+PlayerInfoStroke.Color = Theme.ItemUIStroke
+PlayerInfoStroke.Parent = PlayerInfoFrame
+
+-- 頭像
+local Avatar = Instance.new("ImageLabel")
+Avatar.Name = "Avatar"
+Avatar.Size = UDim2.new(0, 28, 0, 28)
+Avatar.Position = UDim2.new(0, 4, 0, 4)
+Avatar.BackgroundTransparency = 1
+Avatar.Parent = PlayerInfoFrame
+
+local AvatarCorner = Instance.new("UICorner")
+AvatarCorner.CornerRadius = UDim.new(1, 0)
+AvatarCorner.Parent = Avatar
+
+-- 取得頭像
+task.spawn(function()
+    local content = Players:GetUserThumbnailAsync(
+        LocalPlayer.UserId,
+        Enum.ThumbnailType.HeadShot,
+        Enum.ThumbnailSize.Size100x100
+    )
+    Avatar.Image = content
+end)
+
+-- 名稱（DisplayName + @Username）
+local NameLabel = Instance.new("TextLabel")
+NameLabel.Name = "Username"
+NameLabel.BackgroundTransparency = 1
+NameLabel.Position = UDim2.new(0, 38, 0, 0)
+NameLabel.Size = UDim2.new(1, -40, 1, 0)
+NameLabel.Font = Enum.Font.GothamBold
+NameLabel.TextSize = 12
+NameLabel.TextColor3 = Theme.ItemText
+NameLabel.TextXAlignment = Enum.TextXAlignment.Left
+NameLabel.TextYAlignment = Enum.TextYAlignment.Center
+NameLabel.Text = LocalPlayer.DisplayName .. " (@" .. LocalPlayer.Name .. ")"
+NameLabel.Parent = PlayerInfoFrame
+--d
 local tabContainer = Instance.new("Frame")
 tabContainer.Name = "TabContainer"
 tabContainer.BackgroundColor3 = Theme.TabContainer
