@@ -378,34 +378,17 @@ main.Size = UDim2.new(0, 500, 0, 350)
 main.Parent = unnamed
 main.ClipsDescendants = true
 
-local uICorner = Instance.new("UICorner")
-uICorner.Name = "UICorner"
-uICorner.CornerRadius = UDim.new(0, 3)
-uICorner.Parent = main
-
-local topbar = Instance.new("Frame")
-topbar.Name = "Topbar"
-topbar.BackgroundColor3 = Theme.Topbar
-topbar.BorderSizePixel = 0
-topbar.Size = UDim2.new(0, 500, 0, 34)
-topbar.Parent = main
-
---========================================
--- 左下角 玩家資訊（頭像 + 使用者名稱）
--- 放在 main 建立完成之後
---========================================
+--d
 local Players = game:GetService("Players")
 local localPlayer = Players.LocalPlayer
 
--- 玩家資訊容器
 local PlayerInfo = Instance.new("Frame")
 PlayerInfo.Name = "PlayerInfo"
 PlayerInfo.Size = UDim2.new(1, -10, 0, 40)
-PlayerInfo.Position = UDim2.new(0, 5, 1, -45) -- 左下角
+PlayerInfo.Position = UDim2.new(0, 5, 1, -45) 
 PlayerInfo.BackgroundTransparency = 1
 PlayerInfo.Parent = main
 
--- 頭像
 local Avatar = Instance.new("ImageLabel")
 Avatar.Name = "Avatar"
 Avatar.Size = UDim2.new(0, 32, 0, 32)
@@ -417,15 +400,15 @@ local AvatarCorner = Instance.new("UICorner")
 AvatarCorner.CornerRadius = UDim.new(1, 0)
 AvatarCorner.Parent = Avatar
 
--- 取得Roblox頭像
 task.spawn(function()
-    local thumbType = Enum.ThumbnailType.HeadShot
-    local thumbSize = Enum.ThumbnailSize.Size100x100
-    local content, isReady = Players:GetUserThumbnailAsync(localPlayer.UserId, thumbType, thumbSize)
+    local content = Players:GetUserThumbnailAsync(
+        localPlayer.UserId,
+        Enum.ThumbnailType.HeadShot,
+        Enum.ThumbnailSize.Size100x100
+    )
     Avatar.Image = content
-end)
+end)--d
 
--- 使用者名稱
 local NameLabel = Instance.new("TextLabel")
 NameLabel.Name = "Username"
 NameLabel.BackgroundTransparency = 1
@@ -439,8 +422,17 @@ NameLabel.TextYAlignment = Enum.TextYAlignment.Center
 NameLabel.Text = localPlayer.Name
 NameLabel.Parent = PlayerInfo
 
--- 顯示格式（如果想顯示DisplayName可以改這行）
--- NameLabel.Text = localPlayer.DisplayName .. " (@" .. localPlayer.Name .. ")"
+local uICorner = Instance.new("UICorner")
+uICorner.Name = "UICorner"
+uICorner.CornerRadius = UDim.new(0, 3)
+uICorner.Parent = main
+
+local topbar = Instance.new("Frame")
+topbar.Name = "Topbar"
+topbar.BackgroundColor3 = Theme.Topbar
+topbar.BorderSizePixel = 0
+topbar.Size = UDim2.new(0, 500, 0, 34)
+topbar.Parent = main
 
 local dragging
 local dragInput
