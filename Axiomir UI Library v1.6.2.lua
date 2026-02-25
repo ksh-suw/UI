@@ -378,6 +378,24 @@ main.Size = UDim2.new(0, 500, 0, 350)
 main.Parent = unnamed
 main.ClipsDescendants = true
 
+
+local NameLabel = Instance.new("TextLabel")
+NameLabel.Name = "Username"
+NameLabel.BackgroundTransparency = 1
+NameLabel.Position = UDim2.new(0, 38, 0, 0)
+NameLabel.Size = UDim2.new(1, -40, 1, 0)
+NameLabel.Font = Enum.Font.GothamBold
+NameLabel.TextSize = 13
+NameLabel.TextColor3 = Color3.fromRGB(230, 230, 230)
+NameLabel.TextXAlignment = Enum.TextXAlignment.Left
+NameLabel.TextYAlignment = Enum.TextYAlignment.Center
+NameLabel.Text = localPlayer.Name
+NameLabel.Parent = PlayerInfo
+
+local uICorner = Instance.new("UICorner")
+uICorner.Name = "UICorner"
+uICorner.CornerRadius = UDim.new(0, 3)
+uICorner.Parent = main
 --d
 local Players = game:GetService("Players")
 local localPlayer = Players.LocalPlayer
@@ -408,25 +426,6 @@ task.spawn(function()
     )
     Avatar.Image = content
 end)--d
-
-local NameLabel = Instance.new("TextLabel")
-NameLabel.Name = "Username"
-NameLabel.BackgroundTransparency = 1
-NameLabel.Position = UDim2.new(0, 38, 0, 0)
-NameLabel.Size = UDim2.new(1, -40, 1, 0)
-NameLabel.Font = Enum.Font.GothamBold
-NameLabel.TextSize = 13
-NameLabel.TextColor3 = Color3.fromRGB(230, 230, 230)
-NameLabel.TextXAlignment = Enum.TextXAlignment.Left
-NameLabel.TextYAlignment = Enum.TextYAlignment.Center
-NameLabel.Text = localPlayer.Name
-NameLabel.Parent = PlayerInfo
-
-local uICorner = Instance.new("UICorner")
-uICorner.Name = "UICorner"
-uICorner.CornerRadius = UDim.new(0, 3)
-uICorner.Parent = main
-
 local topbar = Instance.new("Frame")
 topbar.Name = "Topbar"
 topbar.BackgroundColor3 = Theme.Topbar
